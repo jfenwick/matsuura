@@ -5,9 +5,8 @@ parser.add_argument('infile', metavar='filename', type=file,
                    help='File to fix')
 args = parser.parse_args()
 
-# scale the value of a gcode by 10000
-# if cast is true, cast to an int instead of scaling
-def scale_code( line, code, cast ):
+# scale the value of a gcode by amount
+def scale_code( line, code, amount ):
 	eol = False
 	index = line.find(code)
 	if index > -1:
@@ -17,12 +16,10 @@ def scale_code( line, code, cast ):
 			end = len(line) - 1
 			# send end of line flag
 			eol = True
+		# find the numerical part of the gcode
 		x = line[index+1:index+end]
-		# if cast flag set, cast the value to int instead of scaling
-		if cast:
-			x = int(float(x))
-		else:
-			x = int(float(x) * 10000)
+		# scale the gcode
+		x = int(float(x) * amount)
 		line = line[:index] + code + str(x) + line[index+end:]
 		# if end of line, add newline
 		if eol:
@@ -56,13 +53,13 @@ for line in fi:
 		# this should be N0001
 		line = line.replace("N0000", "N0001")
 
-	line = scale_code(line, 'X', False)
-	line = scale_code(line, 'Y', False)
-	line = scale_code(line, 'Z', False)
-	line = scale_code(line, 'I', False)
-	line = scale_code(line, 'J', False)
-	line = scale_code(line, 'K', False)
-	line = scale_code(line, 'F', True)
+	line = scale_code(line, 'X', 10000)
+	line = scale_code(line, 'Y', 10000)
+	line = scale_code(line, 'Z', 10000)
+	line = scale_code(line, 'I', 10000)
+	line = scale_code(line, 'J', 10000)
+	line = scale_code(line, 'K', 10000)
+	line = scale_code(line, 'F', 10)
 
 	# check if there's a line that starts with X, Y or Z instead of a G
 	# we're going to assume it's the g code from the last line
